@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: fastfeet_api
+    # A MUDANÇA ESTÁ AQUI:
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+    # E AQUI:
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://docker:docker@db:5432/fastfeet?schema=public
+
+  db:
+    image: postgres:15-alpine
+    container_name: fastfeet_db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=fastfeet
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
