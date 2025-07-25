@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Define o gerador de cliente do Prisma, que criará o cliente TypeScript
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define a fonte de dados, nosso banco de dados PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Lê a URL do banco a partir das variáveis de ambiente
+}
+
+// Enum para os tipos de usuário da aplicação
+enum Role {
+  ADMIN
+  DELIVERYMAN
+}
+
+// Enum para os status possíveis de uma encomenda
+enum Status {
+  WAITING   // Aguardando retirada
+  WITHDRAWN // Retirado pelo entregador
+  DELIVERED // Entregue
+  RETURNED  // Devolvido
+}
+
+// Modelo para Usuários (Administradores e Entregadores)
+model User {
+  id        String   @id @default(cuid())
+  cpf       String   @unique
+  password  String
+  name      String
+  role      Role     @default(DELIVERYMAN)
+  orders    Order[] // Um entregador pode ter várias encomendas
+
+  @@map("users")
+}
+
+// Modelo para Destinatários
+model Recipient {
+  id           String  @id @default(cuid())
+  name         String
+  street       String
+  number       String
+  neighborhood String
+  city         String
+  state        String
+  zipCode      String
+  orders       Order[] // Um destinatário pode ter várias encomendas
+
+  @@map("recipients")
+}
+
+// Modelo para Encomendas
+model Order {
+  id             String    @id @default(cuid())
+  status         Status    @default(WAITING)
+  photoUrl       String?
+  postedAt       DateTime  @default(now())
+  withdrawnAt    DateTime?
+  deliveredAt    DateTime?
+  returnedAt     DateTime?
+  
+  // Relação com o Destinatário (obrigatória)
+  recipientId    String
+  recipient      Recipient @relation(fields: [recipientId], references: [id])
+  
+  // Relação com o Entregador (opcional, pode ser atribuída depois)
+  deliverymanId  String?
+  deliveryman    User?     @relation(fields: [deliverymanId], references: [id])
+
+  @@map("orders")
+}
