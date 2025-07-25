@@ -1,37 +1,24 @@
-# Estágio de Build - Instala dependências e compila o projeto
-FROM node:18-alpine AS builder
+# 1. Usa a versão 20 do Node.js, que é compatível com as dependências
+FROM node:20-alpine
 
 # Define o diretório de trabalho dentro do container
 WORKDIR /usr/src/app
 
-# Copia os arquivos de definição de pacotes e instala as dependências
+# Copia os arquivos de definição de pacotes primeiro
 COPY package*.json ./
+
+# 2. Copia a pasta do Prisma ANTES de instalar as dependências
+COPY prisma ./prisma/
+
+# Instala TODAS as dependências (incluindo as de desenvolvimento)
+# Agora o "prisma generate" (do postinstall) vai funcionar
 RUN npm install
 
-# Copia todo o código fonte da aplicação
+# Copia todo o resto do código fonte
 COPY . .
 
-# Compila a aplicação TypeScript para JavaScript
-RUN npm run build
-
-# ---
-
-# Estágio de Produção - Imagem final, mais leve e segura
-FROM node:18-alpine
-
-WORKDIR /usr/src/app
-
-# Copia os arquivos de definição de pacotes e instala APENAS as dependências de produção
-COPY package*.json ./
-RUN npm install --only=production
-
-# Copia a aplicação compilada e os node_modules do estágio de build
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-
-
-# Expõe a porta que a aplicação irá rodar
+# Expõe a porta da aplicação
 EXPOSE 3000
 
-# Comando para iniciar a aplicação
-CMD ["node", "dist/main"]
+# O comando para iniciar em modo de desenvolvimento
+CMD ["npm", "run", "start:dev"]
