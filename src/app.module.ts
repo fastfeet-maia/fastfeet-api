@@ -5,10 +5,17 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { RecipientsModule } from './recipients/recipients.module';
 import { OrdersModule } from './orders/orders.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, RecipientsModule, OrdersModule], // Importa os módulos aqui
+  imports: [
+    PrismaModule,
+    UsersModule,
+    RecipientsModule,
+    OrdersModule,
+    AuthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService], // Removemos o PrismaService daqui
+  providers: [AppService],
 })
 export class AppModule {}

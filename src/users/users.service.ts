@@ -82,4 +82,12 @@ export class UsersService {
       where: { id },
     });
   }
+
+  async findByCpf(cpf: string) {
+  return this.prisma.user.findUnique({
+    where: {
+      cpf,
+    },
+  });
+  }
 }
