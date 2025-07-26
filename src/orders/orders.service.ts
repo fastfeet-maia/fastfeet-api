@@ -60,7 +60,6 @@ export class OrdersService {
         },
       });
 
-      // Remove a senha do entregador
       if (order.deliveryman) {
         const { password, ...deliveryman } = order.deliveryman;
         return { ...order, deliveryman };
@@ -85,5 +84,18 @@ export class OrdersService {
     await this.prisma.order.delete({
       where: { id },
     });
+  }
+
+  async findAllByDeliverymanId(deliverymanId: string) {
+    const orders = await this.prisma.order.findMany({
+      where: {
+        deliverymanId,
+      },
+      include: {
+        recipient: true,
+      },
+    });
+    
+    return orders;
   }
 }
