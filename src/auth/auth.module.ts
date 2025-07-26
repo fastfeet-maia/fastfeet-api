@@ -11,8 +11,8 @@ import { JwtModule } from '@nestjs/jwt';
     UsersModule,
     PassportModule,
     JwtModule.register({
-      secret: 'SEGREDO_SUPER_SECRETO', // Em um projeto real, use variáveis de ambiente!
-      signOptions: { expiresIn: '1d' }, // Token expira em 1 dia
+      secret: 'SEGREDO_SUPER_SECRETO', 
+      signOptions: { expiresIn: '1d' }, 
     }),
   ],
   controllers: [AuthController],
