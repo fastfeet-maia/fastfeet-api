@@ -89,7 +89,6 @@ export class OrdersService {
       data: updateOrderDto,
     });
 
-    // Se o status foi alterado, dispare o evento
     if (
       updateOrderDto.status &&
       orderBeforeUpdate.status !== updatedOrder.status
@@ -97,7 +96,6 @@ export class OrdersService {
       const event = new OrderStatusChangedEvent();
       event.order = updatedOrder;
       this.eventEmitter.emit('order.status-changed', event);
-      console.log('EVENTO "order.status-changed" EMITIDO!'); // Log para depuração
     }
 
     return this.findOne(id);
@@ -119,6 +117,29 @@ export class OrdersService {
         recipient: true,
       },
     });
+    return orders;
+  }
+
+  async findAllNearby(city: string, neighborhood: string) {
+    const orders = await this.prisma.order.findMany({
+      where: {
+        recipient: {
+          city: {
+            equals: city,
+            mode: 'insensitive',
+          },
+          neighborhood: {
+            equals: neighborhood,
+            mode: 'insensitive',
+          },
+        },
+        status: 'WAITING',
+      },
+      include: {
+        recipient: true,
+      },
+    });
+
     return orders;
   }
 }

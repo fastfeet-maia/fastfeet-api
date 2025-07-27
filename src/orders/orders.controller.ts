@@ -9,6 +9,7 @@ import {
   HttpCode,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -25,9 +26,13 @@ export class OrdersController {
 
   @Get('my-deliveries')
   findMyDeliveries(@Request() req) {
-    // req.user é o payload do token que nossa JwtStrategy retorna
     const deliverymanId = req.user.userId;
     return this.ordersService.findAllByDeliverymanId(deliverymanId);
+  }
+
+  @Get('nearby')
+  findNearby(@Query('city') city: string, @Query('neighborhood') neighborhood: string) {
+    return this.ordersService.findAllNearby(city, neighborhood);
   }
 
   @Post()
@@ -59,4 +64,4 @@ export class OrdersController {
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
   }
-}
+} 
