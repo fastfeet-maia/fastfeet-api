@@ -1,98 +1,138 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# API FastFeet
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📖 Sobre o Projeto
 
-## Description
+Esta é a API para a **FastFeet**, uma aplicação de logística fictícia. [cite_start]O projeto foi desenvolvido como parte do **Desafio 04 do treinamento Ignite da Rocketseat**[cite: 6], com foco em praticar conceitos de desenvolvimento back-end em um ambiente Node.js.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A API é responsável por gerenciar entregadores, destinatários e encomendas, além de implementar um sistema completo de autenticação e autorização para controlar o acesso às suas funcionalidades.
 
-## Project setup
+## ✨ Funcionalidades Implementadas
 
-```bash
-$ npm install
-```
+O projeto implementa 100% dos requisitos funcionais do desafio:
 
-## Compile and run the project
+* [cite_start]**📦 CRUD Completo:** Gerenciamento total de Entregadores, Destinatários e Encomendas. [cite: 32, 33, 34]
+* [cite_start]**🔐 Autenticação e Autorização:** Sistema de login com CPF/Senha via JWT [cite: 31] [cite_start]e controle de acesso baseado em papéis (Admin). [cite: 30, 44, 45, 46]
+* [cite_start]**🛵 Funcionalidades do Entregador:** Rotas específicas para um entregador listar suas próprias encomendas [cite: 41] [cite_start]e encontrar entregas próximas. [cite: 39]
+* [cite_start]**🔔 Notificações por Eventos:** Arquitetura desacoplada com eventos de domínio para notificar sobre alterações no status das encomendas. [cite: 42]
+* **🛡️ Segurança:** Hash de senhas com `bcrypt` e validação de dados de entrada com `class-validator`.
 
-```bash
-# development
-$ npm run start
+## 🛠️ Tecnologias Utilizadas
 
-# watch mode
-$ npm run start:dev
+* **Node.js**
+* **NestJS**
+* **TypeScript**
+* **Prisma**
+* **PostgreSQL**
+* **Docker & Docker Compose**
+* **Passport.js (JWT & Local Strategy)**
+* **Bcrypt**
 
-# production mode
-$ npm run start:prod
-```
+## 🚀 Como Rodar o Projeto
 
-## Run tests
+Siga os passos abaixo para executar a aplicação em seu ambiente local.
 
-```bash
-# unit tests
-$ npm run test
+### Pré-requisitos
 
-# e2e tests
-$ npm run test:e2e
+* [Node.js](https://nodejs.org/en/) (v20 ou superior)
+* [Docker](https://www.docker.com/get-started/) e [Docker Compose](https://docs.docker.com/compose/install/)
+* [Git](https://git-scm.com/)
 
-# test coverage
-$ npm run test:cov
-```
+### Passos
 
-## Deployment
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/seu-usuario/fastfeet-api.git](https://github.com/seu-usuario/fastfeet-api.git)
+    ```
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+2.  **Acesse a pasta do projeto:**
+    ```bash
+    cd fastfeet-api
+    ```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+3.  **Crie o arquivo de variáveis de ambiente:**
+    Copie o arquivo de exemplo `.env.example` (se não existir, crie um `.env`) e preencha a `DATABASE_URL` para as ferramentas locais.
+    ```bash
+    cp .env.example .env
+    ```
+    O conteúdo do `.env` deve ser:
+    ```env
+    DATABASE_URL="postgresql://docker:docker@localhost:5433/fastfeet?schema=public"
+    ```
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+4.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+5.  **Inicie os containers Docker (API + Banco de Dados):**
+    ```bash
+    docker-compose up --build
+    ```
 
-## Resources
+6.  **Rode as migrações do banco de dados:**
+    Com os containers rodando, abra um **novo terminal** e execute:
+    ```bash
+    npx prisma migrate dev
+    ```
 
-Check out a few resources that may come in handy when working with NestJS:
+Pronto! A API estará rodando em `http://localhost:3000`.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 📚 Rotas da API
 
-## Support
+A seguir estão as rotas disponíveis na API. Rotas protegidas exigem um `access_token` JWT no cabeçalho `Authorization: Bearer <token>`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Autenticação
 
-## Stay in touch
+* `POST /auth/login`
+    * **Descrição:** Autentica um usuário e retorna um token de acesso.
+    * **Corpo (Body):**
+        ```json
+        {
+          "cpf": "123.456.789-00",
+          "password": "senha_forte_123"
+        }
+        ```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Usuários / Entregadores (`/users`)
 
-## License
+* `POST /users` **[ADMIN]**: Cria um novo usuário.
+* `GET /users` **[ADMIN]**: Lista todos os usuários.
+* `GET /users/:id` **[ADMIN]**: Busca um usuário por ID.
+* `PATCH /users/:id` **[ADMIN]**: Atualiza um usuário.
+* `DELETE /users/:id` **[ADMIN]**: Deleta um usuário.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Destinatários (`/recipients`)
+
+* `POST /recipients` **[ADMIN]**: Cria um novo destinatário.
+* `GET /recipients` **[ADMIN]**: Lista todos os destinatários.
+* `GET /recipients/:id` **[ADMIN]**: Busca um destinatário por ID.
+* `PATCH /recipients/:id` **[ADMIN]**: Atualiza um destinatário.
+* `DELETE /recipients/:id` **[ADMIN]**: Deleta um destinatário.
+
+### Encomendas (`/orders`)
+
+* `POST /orders` **[ADMIN]**: Cria uma nova encomenda.
+    * **Corpo (Body):**
+        ```json
+        {
+          "recipientId": "id_do_destinatario",
+          "deliverymanId": "id_do_entregador"
+        }
+        ```
+* `GET /orders` **[ADMIN]**: Lista todas as encomendas.
+* `GET /orders/my-deliveries` **[ENTREGADOR]**: Lista as encomendas do entregador logado.
+* `GET /orders/nearby` **[ENTREGADOR]**: Lista encomendas próximas com base na cidade e bairro.
+    * **Exemplo:** `GET /orders/nearby?city=São Paulo&neighborhood=Centro`
+* `GET /orders/:id` **[PROTEGIDO]**: Busca uma encomenda por ID.
+* `PATCH /orders/:id` **[ADMIN]**: Atualiza uma encomenda (ex: status).
+* `DELETE /orders/:id` **[ADMIN]**: Deleta uma encomenda.
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
