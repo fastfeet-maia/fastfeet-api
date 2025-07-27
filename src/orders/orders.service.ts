@@ -2,10 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OrderStatusChangedEvent } from './events/order-status-changed.event';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto) {
     const { recipientId, deliverymanId } = createOrderDto;
@@ -40,7 +45,6 @@ export class OrdersService {
       },
     });
 
-    // Mapeia os resultados para remover a senha de cada entregador
     return orders.map((order) => {
       if (order.deliveryman) {
         const { password, ...deliveryman } = order.deliveryman;
@@ -72,11 +76,31 @@ export class OrdersService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
-    await this.findOne(id);
-    return this.prisma.order.update({
+    const orderBeforeUpdate = await this.prisma.order.findUnique({
+      where: { id },
+    });
+
+    if (!orderBeforeUpdate) {
+      throw new NotFoundException(`Encomenda com ID "${id}" não encontrada.`);
+    }
+
+    const updatedOrder = await this.prisma.order.update({
       where: { id },
       data: updateOrderDto,
     });
+
+    // Se o status foi alterado, dispare o evento
+    if (
+      updateOrderDto.status &&
+      orderBeforeUpdate.status !== updatedOrder.status
+    ) {
+      const event = new OrderStatusChangedEvent();
+      event.order = updatedOrder;
+      this.eventEmitter.emit('order.status-changed', event);
+      console.log('EVENTO "order.status-changed" EMITIDO!'); // Log para depuração
+    }
+
+    return this.findOne(id);
   }
 
   async remove(id: string) {
@@ -95,7 +119,6 @@ export class OrdersService {
         recipient: true,
       },
     });
-    
     return orders;
   }
 }

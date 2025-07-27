@@ -6,9 +6,11 @@ import { UsersModule } from './users/users.module';
 import { RecipientsModule } from './recipients/recipients.module';
 import { OrdersModule } from './orders/orders.module';
 import { AuthModule } from './auth/auth.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     PrismaModule,
     UsersModule,
     RecipientsModule,
