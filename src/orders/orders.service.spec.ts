@@ -10,8 +10,8 @@ describe('OrdersService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OrdersService,
-        { provide: PrismaService, useValue: {} },
-        { provide: EventEmitter2, useValue: {} },
+        { provide: PrismaService, useValue: {} }, // Mock vazio
+        { provide: EventEmitter2, useValue: {} }, // Mock vazio
       ],
     }).compile();
 
