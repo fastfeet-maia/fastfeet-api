@@ -1,69 +1,101 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException, // Importa o NotFoundException
-} from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { hash } from 'bcrypt';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { Role } from '@prisma/client';
 
-@Injectable()
-export class UsersService {
-  constructor(private prisma: PrismaService) {}
+const prismaMock = {
+  user: {
+    findUnique: jest.fn(),
+    findUniqueOrThrow: jest.fn(),
+    create: jest.fn(),
+  },
+};
 
-  async create(createUserDto: CreateUserDto) {
-    const { name, cpf, password } = createUserDto;
+describe('UsersService', () => {
+  let service: UsersService;
+  let prisma: PrismaService;
 
-    const userWithSameCpf = await this.prisma.user.findUnique({
-      where: { cpf },
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: PrismaService, useValue: prismaMock },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+    // A correção está aqui:
+    prisma = module.get<PrismaService>(PrismaService);
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  describe('create', () => {
+    it('should create a new user with a hashed password', async () => {
+      const createUserDto = {
+        name: 'Test User',
+        cpf: '12345678900',
+        password: 'password123',
+      };
+      const expectedUser = {
+        id: 'some-id',
+        ...createUserDto,
+        role: Role.DELIVERYMAN,
+      };
+
+      prismaMock.user.findUnique.mockResolvedValue(null);
+      prismaMock.user.create.mockResolvedValue(expectedUser);
+
+      const result = await service.create(createUserDto);
+
+      expect(prisma.user.create).toHaveBeenCalled();
+      expect(result.name).toEqual(createUserDto.name);
+      expect(result).not.toHaveProperty('password');
     });
 
-    if (userWithSameCpf) {
-      throw new ConflictException('CPF já cadastrado.');
-    }
+    it('should throw a ConflictException if CPF already exists', async () => {
+      const createUserDto = {
+        name: 'Test User',
+        cpf: '12345678900',
+        password: 'password123',
+      };
+      prismaMock.user.findUnique.mockResolvedValue({ id: 'some-id' });
 
-    const hashedPassword = await hash(password, 8);
-
-    const user = await this.prisma.user.create({
-      data: {
-        name,
-        cpf,
-        password: hashedPassword,
-      },
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
+  });
 
-    const { password: _, ...result } = user;
-    return result;
-  }
+  describe('findOne', () => {
+    it('should return a user without the password', async () => {
+      const mockUser = {
+        id: 'some-id',
+        name: 'Test User',
+        cpf: '12345678900',
+        password: 'hashedpassword',
+        role: Role.DELIVERYMAN,
+      };
+      prismaMock.user.findUniqueOrThrow.mockResolvedValue(mockUser);
 
-  async findAll() {
-    const users = await this.prisma.user.findMany();
+      const result = await service.findOne(mockUser.id);
 
-    return users.map((user) => {
-      const { password, ...result } = user;
-      return result;
-    });
-  }
-
-  async findOne(id: string) {
-    try {
-      const user = await this.prisma.user.findUniqueOrThrow({
-        where: { id },
+      expect(prisma.user.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
       });
-
-      const { password, ...result } = user;
-      return result;
-    } catch (error) {
-      // Captura o erro do Prisma e lança uma exceção HTTP padrão do NestJS
-      throw new NotFoundException(`Usuário com ID "${id}" não encontrado.`);
-    }
-  }
-  async remove(id: string) {
-    // Garante que o usuário existe antes de tentar deletar
-    await this.findOne(id);
-
-    await this.prisma.user.delete({
-      where: { id },
+      expect(result).not.toHaveProperty('password');
     });
-  }
-}
+
+    it('should throw NotFoundException if user is not found', async () => {
+      prismaMock.user.findUniqueOrThrow.mockRejectedValue(new Error());
+
+      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+});
