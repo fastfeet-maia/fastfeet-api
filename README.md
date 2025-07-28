@@ -5,22 +5,24 @@
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
 
 ## 📖 Sobre o Projeto
 
-Esta é a API para a **FastFeet**, uma aplicação de logística fictícia. [cite_start]O projeto foi desenvolvido como parte do **Desafio 04 do treinamento Ignite da Rocketseat**[cite: 6], com foco em praticar conceitos de desenvolvimento back-end em um ambiente Node.js.
+Esta é a API para a **FastFeet**, uma aplicação de logística fictícia. O projeto foi desenvolvido como parte do **Desafio 04 do treinamento Ignite da Rocketseat**, com foco em praticar conceitos de desenvolvimento back-end em um ambiente Node.js.
 
-A API é responsável por gerenciar entregadores, destinatários e encomendas, além de implementar um sistema completo de autenticação e autorização para controlar o acesso às suas funcionalidades.
+A API é responsável por gerenciar entregadores, destinatários e encomendas, além de implementar um sistema completo de autenticação, autorização e testes automatizados para garantir a qualidade e a robustez do código.
 
 ## ✨ Funcionalidades Implementadas
 
 O projeto implementa 100% dos requisitos funcionais do desafio:
 
-* [cite_start]**📦 CRUD Completo:** Gerenciamento total de Entregadores, Destinatários e Encomendas. [cite: 32, 33, 34]
-* [cite_start]**🔐 Autenticação e Autorização:** Sistema de login com CPF/Senha via JWT [cite: 31] [cite_start]e controle de acesso baseado em papéis (Admin). [cite: 30, 44, 45, 46]
-* [cite_start]**🛵 Funcionalidades do Entregador:** Rotas específicas para um entregador listar suas próprias encomendas [cite: 41] [cite_start]e encontrar entregas próximas. [cite: 39]
-* [cite_start]**🔔 Notificações por Eventos:** Arquitetura desacoplada com eventos de domínio para notificar sobre alterações no status das encomendas. [cite: 42]
+* **📦 CRUD Completo:** Gerenciamento total de Entregadores, Destinatários e Encomendas.
+* **🔐 Autenticação e Autorização:** Sistema de login com CPF/Senha via JWT e controle de acesso baseado em papéis (Admin).
+* **🛵 Funcionalidades do Entregador:** Rotas específicas para um entregador listar suas próprias encomendas e encontrar entregas próximas.
+* **🔔 Notificações por Eventos:** Arquitetura desacoplada com eventos de domínio para notificar sobre alterações no status das encomendas.
 * **🛡️ Segurança:** Hash de senhas com `bcrypt` e validação de dados de entrada com `class-validator`.
+* **🧪 Testes Automatizados:** Cobertura de testes unitários e End-to-End (E2E) para as principais funcionalidades.
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -31,7 +33,8 @@ O projeto implementa 100% dos requisitos funcionais do desafio:
 * **PostgreSQL**
 * **Docker & Docker Compose**
 * **Passport.js (JWT & Local Strategy)**
-* **Bcrypt**
+* **Jest:** Para testes unitários e E2E.
+* **Supertest:** Para requisições HTTP nos testes E2E.
 
 ## 🚀 Como Rodar o Projeto
 
@@ -55,15 +58,20 @@ Siga os passos abaixo para executar a aplicação em seu ambiente local.
     cd fastfeet-api
     ```
 
-3.  **Crie o arquivo de variáveis de ambiente:**
-    Copie o arquivo de exemplo `.env.example` (se não existir, crie um `.env`) e preencha a `DATABASE_URL` para as ferramentas locais.
+3.  **Crie os arquivos de variáveis de ambiente:**
+    Copie o arquivo de exemplo `.env.example` (se não existir, crie os arquivos manualmente) para `.env` e `.env.test`.
     ```bash
     cp .env.example .env
+    cp .env.example .env.test
     ```
-    O conteúdo do `.env` deve ser:
-    ```env
-    DATABASE_URL="postgresql://docker:docker@localhost:5433/fastfeet?schema=public"
-    ```
+    * No arquivo `.env`, o conteúdo deve ser:
+        ```env
+        DATABASE_URL="postgresql://docker:docker@localhost:5433/fastfeet?schema=public"
+        ```
+    * No arquivo `.env.test`, o nome do banco de dados deve ser diferente:
+        ```env
+        DATABASE_URL="postgresql://docker:docker@localhost:5433/fastfeet_test?schema=public"
+        ```
 
 4.  **Instale as dependências:**
     ```bash
@@ -76,12 +84,29 @@ Siga os passos abaixo para executar a aplicação em seu ambiente local.
     ```
 
 6.  **Rode as migrações do banco de dados:**
-    Com os containers rodando, abra um **novo terminal** e execute:
+    Com os containers rodando, abra um **novo terminal** e execute as migrações para os dois bancos de dados:
     ```bash
+    # Migração para o banco de desenvolvimento
     npx prisma migrate dev
+
+    # Migração para o banco de teste
+    npm run test:migrate
     ```
 
 Pronto! A API estará rodando em `http://localhost:3000`.
+
+## 🧪 Como Rodar os Testes
+
+O projeto possui uma suíte completa de testes unitários e E2E.
+
+* **Para rodar os testes unitários:**
+    ```bash
+    npm run test
+    ```
+* **Para rodar os testes End-to-End:**
+    ```bash
+    npm run test:e2e
+    ```
 
 ## 📚 Rotas da API
 
@@ -91,13 +116,6 @@ A seguir estão as rotas disponíveis na API. Rotas protegidas exigem um `access
 
 * `POST /auth/login`
     * **Descrição:** Autentica um usuário e retorna um token de acesso.
-    * **Corpo (Body):**
-        ```json
-        {
-          "cpf": "123.456.789-00",
-          "password": "senha_forte_123"
-        }
-        ```
 
 ### Usuários / Entregadores (`/users`)
 
@@ -118,21 +136,13 @@ A seguir estão as rotas disponíveis na API. Rotas protegidas exigem um `access
 ### Encomendas (`/orders`)
 
 * `POST /orders` **[ADMIN]**: Cria uma nova encomenda.
-    * **Corpo (Body):**
-        ```json
-        {
-          "recipientId": "id_do_destinatario",
-          "deliverymanId": "id_do_entregador"
-        }
-        ```
 * `GET /orders` **[ADMIN]**: Lista todas as encomendas.
 * `GET /orders/my-deliveries` **[ENTREGADOR]**: Lista as encomendas do entregador logado.
-* `GET /orders/nearby` **[ENTREGADOR]**: Lista encomendas próximas com base na cidade e bairro.
-    * **Exemplo:** `GET /orders/nearby?city=São Paulo&neighborhood=Centro`
+* `GET /orders/nearby` **[PROTEGIDO]**: Lista encomendas próximas com base na cidade e bairro.
 * `GET /orders/:id` **[PROTEGIDO]**: Busca uma encomenda por ID.
-* `PATCH /orders/:id` **[ADMIN]**: Atualiza uma encomenda (ex: status).
+* `PATCH /orders/:id` **[ADMIN]**: Atualiza uma encomenda.
 * `DELETE /orders/:id` **[ADMIN]**: Deleta uma encomenda.
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto está sob a licença MIT.
