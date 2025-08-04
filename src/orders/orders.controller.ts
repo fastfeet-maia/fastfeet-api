@@ -1,15 +1,5 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  UseGuards,
-  Request,
-  Query,
+  Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, UseGuards, Request, Query
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -18,6 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guards';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { DeliverOrderDto } from './dto/deliver-order.dto';
 
 @Controller('orders')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -52,6 +43,16 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
+  @Patch(':id/deliver')
+  deliverOrder(
+    @Param('id') id: string,
+    @Request() req,
+    @Body() deliverOrderDto: DeliverOrderDto,
+  ) {
+    const deliverymanId = req.user.userId;
+    return this.ordersService.deliver(id, deliverymanId, deliverOrderDto);
+  }
+
   @Patch(':id')
   @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
@@ -64,4 +65,4 @@ export class OrdersController {
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
   }
-} 
+}
