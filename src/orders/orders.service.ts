@@ -19,19 +19,37 @@ export class OrdersService {
 
   async create(createOrderDto: CreateOrderDto) {
     const { recipientId, deliverymanId } = createOrderDto;
-    const recipientExists = await this.prisma.recipient.findUnique({ where: { id: recipientId } });
+
+    const recipientExists = await this.prisma.recipient.findUnique({
+      where: { id: recipientId },
+    });
     if (!recipientExists) {
       throw new NotFoundException('Destinatário não encontrado.');
     }
-    const deliverymanExists = await this.prisma.user.findUnique({ where: { id: deliverymanId } });
+
+    const deliverymanExists = await this.prisma.user.findUnique({
+      where: { id: deliverymanId },
+    });
     if (!deliverymanExists) {
       throw new NotFoundException('Entregador não encontrado.');
     }
-    return this.prisma.order.create({ data: { recipientId, deliverymanId } });
+
+    return this.prisma.order.create({
+      data: {
+        recipientId,
+        deliverymanId,
+      },
+    });
   }
 
   async findAll() {
-    const orders = await this.prisma.order.findMany({ include: { recipient: true, deliveryman: true } });
+    const orders = await this.prisma.order.findMany({
+      include: {
+        recipient: true,
+        deliveryman: true,
+      },
+    });
+
     return orders.map((order) => {
       if (order.deliveryman) {
         const { password, ...deliveryman } = order.deliveryman;
@@ -43,11 +61,19 @@ export class OrdersService {
 
   async findOne(id: string) {
     try {
-      const order = await this.prisma.order.findUniqueOrThrow({ where: { id }, include: { recipient: true, deliveryman: true } });
+      const order = await this.prisma.order.findUniqueOrThrow({
+        where: { id },
+        include: {
+          recipient: true,
+          deliveryman: true,
+        },
+      });
+
       if (order.deliveryman) {
         const { password, ...deliveryman } = order.deliveryman;
         return { ...order, deliveryman };
       }
+
       return order;
     } catch (error) {
       throw new NotFoundException(`Encomenda com ID "${id}" não encontrada.`);
@@ -55,46 +81,50 @@ export class OrdersService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
-    const orderBeforeUpdate = await this.prisma.order.findUnique({ where: { id } });
+    const orderBeforeUpdate = await this.prisma.order.findUnique({
+      where: { id },
+    });
+
     if (!orderBeforeUpdate) {
       throw new NotFoundException(`Encomenda com ID "${id}" não encontrada.`);
     }
-    const updatedOrder = await this.prisma.order.update({ where: { id }, data: updateOrderDto });
-    if (updateOrderDto.status && orderBeforeUpdate.status !== updatedOrder.status) {
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id },
+      data: updateOrderDto,
+    });
+
+    if (
+      updateOrderDto.status &&
+      orderBeforeUpdate.status !== updatedOrder.status
+    ) {
       const event = new OrderStatusChangedEvent();
       event.order = updatedOrder;
       this.eventEmitter.emit('order.status-changed', event);
     }
+
     return this.findOne(id);
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.order.delete({ where: { id } });
+    await this.prisma.order.delete({
+      where: { id },
+    });
   }
 
   async findAllByDeliverymanId(deliverymanId: string) {
-    return this.prisma.order.findMany({ where: { deliverymanId }, include: { recipient: true } });
-  }
-
-  async deliver(id: string, deliverymanId: string, deliverOrderDto: DeliverOrderDto) {
-    const order = await this.prisma.order.findUnique({ where: { id } });
-    if (!order) {
-      throw new NotFoundException(`Encomenda com ID "${id}" não encontrada.`);
-    }
-    if (order.deliverymanId !== deliverymanId) {
-      throw new ForbiddenException('Você não tem permissão para entregar esta encomenda.');
-    }
-    const updatedOrder = await this.prisma.order.update({
-      where: { id },
-      data: { status: 'DELIVERED', photoUrl: deliverOrderDto.photoUrl, deliveredAt: new Date() },
+    const orders = await this.prisma.order.findMany({
+      where: {
+        deliverymanId,
+      },
+      include: {
+        recipient: true,
+      },
     });
-    const event = new OrderStatusChangedEvent();
-    event.order = updatedOrder;
-    this.eventEmitter.emit('order.status-changed', event);
-    return updatedOrder;
+    return orders;
   }
-
+  
   async findAllNearby(city: string, neighborhood: string) {
     return this.prisma.order.findMany({
       where: {
@@ -108,5 +138,62 @@ export class OrdersService {
         recipient: true,
       },
     });
+  }
+
+  async withdraw(id: string, deliverymanId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Encomenda com ID "${id}" não encontrada.`);
+    }
+
+    if (order.deliverymanId !== deliverymanId) {
+      throw new ForbiddenException('Você não tem permissão para retirar esta encomenda.');
+    }
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id },
+      data: {
+        status: 'WITHDRAWN',
+        withdrawnAt: new Date(),
+      },
+    });
+
+    const event = new OrderStatusChangedEvent();
+    event.order = updatedOrder;
+    this.eventEmitter.emit('order.status-changed', event);
+
+    return updatedOrder;
+  }
+
+  async deliver(id: string, deliverymanId: string, deliverOrderDto: DeliverOrderDto) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Encomenda com ID "${id}" não encontrada.`);
+    }
+
+    if (order.deliverymanId !== deliverymanId) {
+      throw new ForbiddenException('Você não tem permissão para entregar esta encomenda.');
+    }
+    
+    const updatedOrder = await this.prisma.order.update({
+      where: { id },
+      data: {
+        status: 'DELIVERED',
+        photoUrl: deliverOrderDto.photoUrl,
+        deliveredAt: new Date(),
+      },
+    });
+
+    const event = new OrderStatusChangedEvent();
+    event.order = updatedOrder;
+    this.eventEmitter.emit('order.status-changed', event);
+
+    return updatedOrder;
   }
 }

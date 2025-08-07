@@ -43,6 +43,12 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
+  @Patch(':id/withdraw')
+  withdrawOrder(@Param('id') id: string, @Request() req) {
+    const deliverymanId = req.user.userId;
+    return this.ordersService.withdraw(id, deliverymanId);
+  }
+
   @Patch(':id/deliver')
   deliverOrder(
     @Param('id') id: string,
